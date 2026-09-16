@@ -1,76 +1,126 @@
-<title>Neon Drop</title>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Neon Drop — 네온 테트리스</title>
+<meta name="description" content="브라우저에서 바로 즐기는 테트리스. 고스트 피스, 홀드, 다음 블록 미리보기까지.">
+<meta name="theme-color" content="#14121f">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Neon Drop">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://lucie-chun.github.io/tetris/">
+<meta property="og:title" content="Neon Drop — 네온 테트리스">
+<meta property="og:description" content="브라우저에서 바로 플레이! 고스트 피스와 홀드 기능이 있는 테트리스. 폰에서도 터치로 즐기세요.">
+<meta property="og:image" content="https://lucie-chun.github.io/tetris/og.png">
+<meta property="og:image:secure_url" content="https://lucie-chun.github.io/tetris/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Neon Drop 테트리스 게임 화면">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Neon Drop — 네온 테트리스">
+<meta name="twitter:description" content="브라우저에서 바로 플레이! 폰에서도 터치로 즐기는 테트리스.">
+<meta name="twitter:image" content="https://lucie-chun.github.io/tetris/og.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2314121f'/%3E%3Crect x='4' y='6' width='10' height='10' fill='%23ffcf4d'/%3E%3Crect x='16' y='6' width='10' height='10' fill='%23c07bff'/%3E%3Crect x='4' y='18' width='10' height='10' fill='%234fd6e0'/%3E%3Crect x='16' y='18' width='10' height='10' fill='%23ff5d73'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=IBM+Plex+Mono:wght@400;600&display=swap">
+
 <style>
   :root{
     --void:#14121f; --panel:#1d1a2c; --edge:#2e2a42; --grid:#241f36;
     --ink:#efeaff; --dim:#8f87ad; --accent:#ffcf4d;
     color-scheme: dark;
   }
-  html,body{height:100%}
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0; overscroll-behavior:none}
   body{
-    margin:0;
     background:radial-gradient(120% 90% at 50% -10%, #2a2440 0%, var(--void) 60%);
     color:var(--ink); font-family:"IBM Plex Mono",ui-monospace,monospace;
     display:flex; align-items:center; justify-content:center;
-    padding:16px; padding-block:24px; box-sizing:border-box;
+    padding:16px;
+    padding-top:calc(16px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+    -webkit-text-size-adjust:100%;
   }
-  .wrap{display:flex; gap:22px; align-items:flex-start; flex-wrap:wrap; justify-content:center; max-width:100%}
+  .wrap{display:flex; gap:22px; align-items:flex-start; justify-content:center; max-width:100%}
   h1{
-    font-family:Bungee,Impact,sans-serif; font-size:clamp(20px,5vw,30px);
-    margin:0 0 14px; letter-spacing:.06em; color:var(--accent);
-    text-shadow:0 0 18px rgba(255,207,77,.35);
+    font-family:Bungee,Impact,sans-serif; font-size:clamp(18px,5vw,30px);
+    margin:0 0 12px; letter-spacing:.06em; color:var(--accent);
+    text-shadow:0 0 18px rgba(255,207,77,.35); text-align:center;
   }
-  .stage{position:relative}
-  canvas{display:block; background:var(--panel); border:2px solid var(--edge);
-    border-radius:6px; box-shadow:0 18px 50px rgba(0,0,0,.55); max-width:100%; height:auto}
-  aside{display:flex; flex-direction:column; gap:14px; min-width:150px}
+  .stage{position:relative; touch-action:none}
+  #board{display:block; background:var(--panel); border:2px solid var(--edge);
+    border-radius:6px; box-shadow:0 18px 50px rgba(0,0,0,.55)}
+  aside{display:flex; flex-direction:column; gap:12px; width:160px; flex:0 0 auto}
   .box{background:var(--panel); border:1px solid var(--edge); border-radius:6px; padding:10px 12px}
   .box h2{margin:0 0 8px; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); font-weight:600}
-  .box canvas{border:0; box-shadow:none; background:transparent; margin:0 auto}
-  .stat{display:flex; justify-content:space-between; font-variant-numeric:tabular-nums; font-size:15px; padding:2px 0}
+  .box canvas{display:block; margin:0 auto}
+  .stat{display:flex; justify-content:space-between; gap:8px; font-variant-numeric:tabular-nums; font-size:15px; padding:2px 0}
   .stat b{color:var(--accent); font-weight:600}
   kbd{background:var(--grid); border:1px solid var(--edge); border-radius:3px; padding:1px 5px; font:inherit; font-size:11px}
   .keys div{font-size:11px; color:var(--dim); line-height:1.7}
   .overlay{position:absolute; inset:0; display:grid; place-content:center; gap:10px; text-align:center;
-    background:rgba(20,18,31,.88); border-radius:6px}
-  .overlay p{margin:0; font-family:Bungee,sans-serif; font-size:22px; letter-spacing:.05em}
+    background:rgba(20,18,31,.9); border-radius:6px; padding:16px}
+  .overlay p{margin:0; font-family:Bungee,sans-serif; font-size:20px; letter-spacing:.05em}
   .overlay small{color:var(--dim)}
   button{font:inherit; background:var(--accent); color:#1a1526; border:0; border-radius:4px;
-    padding:9px 16px; cursor:pointer; font-weight:600; letter-spacing:.04em}
+    padding:10px 18px; cursor:pointer; font-weight:600; letter-spacing:.04em; touch-action:manipulation}
   button:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
-  .touch{display:none; gap:8px; margin-top:12px}
-  .touch button{flex:1; background:var(--grid); color:var(--ink); padding:14px 0; font-size:16px}
-  @media (max-width:560px){ .touch{display:flex} aside{min-width:0; flex:1} .wrap{gap:14px} }
+
+  .pad{display:none}
+
+  /* ---- phone / tablet ---- */
+  @media (max-width:760px){
+    body{flex-direction:column; align-items:center; justify-content:flex-start; padding:10px;
+      padding-top:calc(8px + env(safe-area-inset-top, 0px));
+      padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px))}
+    .wrap{flex-direction:column; align-items:center; gap:8px; width:100%}
+    h1{margin:0 0 6px}
+    aside{flex-direction:row; width:100%; gap:8px; align-items:stretch}
+    .box{padding:7px 9px; flex:1; min-width:0}
+    .box h2{margin:0 0 5px; font-size:9px; letter-spacing:.14em}
+    .stat{font-size:13px; padding:1px 0}
+    .keys{display:none}
+    .pad{display:grid; width:100%; max-width:420px; gap:8px; margin-top:2px;
+      grid-template-columns:repeat(4,1fr); grid-template-areas:"left rot right hold" "left drop right down"}
+    .pad button{background:var(--grid); color:var(--ink); border:1px solid var(--edge);
+      padding:0; height:100%; min-height:46px; font-size:17px; font-weight:400;
+      -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent}
+    .pad button:active{background:var(--edge); color:var(--accent)}
+    .pad [data-act="left"]{grid-area:left} .pad [data-act="right"]{grid-area:right}
+    .pad [data-act="rotate"]{grid-area:rot} .pad [data-act="drop"]{grid-area:drop}
+    .pad [data-act="hold"]{grid-area:hold} .pad [data-act="down"]{grid-area:down}
+  }
 </style>
+</head>
+<body>
 
 <div class="wrap">
-  <div>
+  <div class="col">
     <h1>Neon Drop</h1>
     <div class="stage">
-      <canvas id="board" width="300" height="600"></canvas>
+      <canvas id="board"></canvas>
       <div class="overlay" id="overlay" hidden>
         <p id="ovTitle">Paused</p>
         <small id="ovText">Press P to resume</small>
         <button id="ovBtn" type="button">Resume</button>
       </div>
     </div>
-    <div class="touch">
-      <button type="button" data-act="left">&#9664;</button>
-      <button type="button" data-act="rotate">&#10227;</button>
-      <button type="button" data-act="right">&#9654;</button>
-      <button type="button" data-act="down">&#9660;</button>
-      <button type="button" data-act="drop">&#10515;</button>
-    </div>
   </div>
 
   <aside>
     <div class="box">
       <h2>Next</h2>
-      <canvas id="next" width="120" height="230"></canvas>
+      <canvas id="next"></canvas>
     </div>
     <div class="box">
       <h2>Hold</h2>
-      <canvas id="hold" width="120" height="76"></canvas>
+      <canvas id="hold"></canvas>
     </div>
     <div class="box">
       <h2>Score</h2>
@@ -88,11 +138,25 @@
   </aside>
 </div>
 
+<div class="pad">
+  <button type="button" data-act="left" aria-label="왼쪽">&#9664;</button>
+  <button type="button" data-act="rotate" aria-label="회전">&#10227;</button>
+  <button type="button" data-act="right" aria-label="오른쪽">&#9654;</button>
+  <button type="button" data-act="hold" aria-label="홀드">HOLD</button>
+  <button type="button" data-act="drop" aria-label="하드 드롭">&#10515;</button>
+  <button type="button" data-act="down" aria-label="아래로">&#9660;</button>
+</div>
+
 <script>
-const COLS = 10, ROWS = 20, CELL = 30;
-const bc = document.getElementById('board').getContext('2d');
-const nc = document.getElementById('next').getContext('2d');
-const hc = document.getElementById('hold').getContext('2d');
+const COLS = 10, ROWS = 20;
+let CELL = 30, MINI = 18, horizNext = false;
+
+const boardEl = document.getElementById('board');
+const nextEl = document.getElementById('next');
+const holdEl = document.getElementById('hold');
+const bc = boardEl.getContext('2d');
+const nc = nextEl.getContext('2d');
+const hc = holdEl.getContext('2d');
 
 const SHAPES = {
   I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
@@ -107,6 +171,51 @@ const COLORS = {I:'#4fd6e0', J:'#6d8bff', L:'#ff9f45', O:'#ffcf4d', S:'#5fd48a',
 
 let grid, piece, nextQ, held, canHold, score, lines, level, dropMs, acc, last, state;
 
+/* ---------- responsive sizing ---------- */
+function sizeCanvas(cv, ctx, w, h){
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  cv.style.width = w + 'px';
+  cv.style.height = h + 'px';
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function fit(){
+  const narrow = window.innerWidth <= 760;
+  horizNext = narrow;
+
+  let cell;
+  if (narrow){
+    const padH = document.querySelector('.pad').getBoundingClientRect().height || 100;
+    const asideH = document.querySelector('aside').getBoundingClientRect().height || 90;
+    const titleH = document.querySelector('h1').getBoundingClientRect().height || 30;
+    const chrome = padH + asideH + titleH + 60;
+    const availW = Math.min(window.innerWidth - 20, 440);
+    const availH = window.innerHeight - chrome;
+    cell = Math.floor(Math.min(availW / COLS, availH / ROWS));
+    cell = Math.max(13, Math.min(cell, 34));
+    MINI = 12;
+  } else {
+    const availH = window.innerHeight - 110;
+    cell = Math.floor(Math.min(30, availH / ROWS));
+    cell = Math.max(18, cell);
+    MINI = 18;
+  }
+  CELL = cell;
+
+  sizeCanvas(boardEl, bc, COLS * CELL, ROWS * CELL);
+  if (horizNext){
+    sizeCanvas(nextEl, nc, 3 * 4 * MINI + 12, 4 * MINI);
+    sizeCanvas(holdEl, hc, 4 * MINI, 4 * MINI);
+  } else {
+    sizeCanvas(nextEl, nc, 120, 3 * 76);
+    sizeCanvas(holdEl, hc, 120, 76);
+  }
+  if (grid) paint();
+}
+
+/* ---------- game ---------- */
 const empty = () => Array.from({length: ROWS}, () => Array(COLS).fill(null));
 
 function bag(){
@@ -198,6 +307,7 @@ function hold(){
   piece = spawn();
 }
 
+/* ---------- render ---------- */
 function cell(ctx, x, y, color, size, alpha){
   size = size || CELL;
   ctx.globalAlpha = alpha === undefined ? 1 : alpha;
@@ -209,12 +319,13 @@ function cell(ctx, x, y, color, size, alpha){
 }
 
 function paint(){
+  const W = COLS * CELL, H = ROWS * CELL;
   bc.fillStyle = '#1d1a2c';
-  bc.fillRect(0, 0, COLS * CELL, ROWS * CELL);
+  bc.fillRect(0, 0, W, H);
   bc.strokeStyle = '#241f36';
   bc.lineWidth = 1;
-  for (let x = 1; x < COLS; x++){ bc.beginPath(); bc.moveTo(x*CELL+.5, 0); bc.lineTo(x*CELL+.5, ROWS*CELL); bc.stroke(); }
-  for (let y = 1; y < ROWS; y++){ bc.beginPath(); bc.moveTo(0, y*CELL+.5); bc.lineTo(COLS*CELL, y*CELL+.5); bc.stroke(); }
+  for (let x = 1; x < COLS; x++){ bc.beginPath(); bc.moveTo(x*CELL+.5, 0); bc.lineTo(x*CELL+.5, H); bc.stroke(); }
+  for (let y = 1; y < ROWS; y++){ bc.beginPath(); bc.moveTo(0, y*CELL+.5); bc.lineTo(W, y*CELL+.5); bc.stroke(); }
 
   grid.forEach((row, y) => row.forEach((t, x) => { if (t) cell(bc, x*CELL, y*CELL, COLORS[t]); }));
 
@@ -239,12 +350,19 @@ function paint(){
 }
 
 function mini(ctx, types){
-  const S = 18;
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const S = MINI;
+  const cw = parseFloat(ctx.canvas.style.width), ch = parseFloat(ctx.canvas.style.height);
+  ctx.clearRect(0, 0, cw, ch);
   types.forEach((t, i) => {
     const m = SHAPES[t];
-    const ox = (ctx.canvas.width - m[0].length * S) / 2;
-    const oy = i * 76 + 12;
+    let ox, oy;
+    if (horizNext){
+      ox = i * (4 * S + 6) + (4 * S - m[0].length * S) / 2;
+      oy = (ch - m.length * S) / 2;
+    } else {
+      ox = (cw - m[0].length * S) / 2;
+      oy = i * 76 + 12;
+    }
     m.forEach((row, y) => row.forEach((v, x) => { if (v) cell(ctx, ox + x*S, oy + y*S, COLORS[t], S); }));
   });
 }
@@ -281,6 +399,7 @@ function loop(t){
   requestAnimationFrame(loop);
 }
 
+/* ---------- input ---------- */
 const act = {
   left: () => move(-1),
   right: () => move(1),
@@ -309,15 +428,57 @@ addEventListener('keydown', e => {
   if (e.key === 'r' || e.key === 'R') reset();
 });
 
-document.querySelectorAll('.touch button').forEach(b => {
-  b.addEventListener('click', () => doAct(b.dataset.act));
+/* touch pad: fire on pointerdown, with auto-repeat for move / soft drop */
+document.querySelectorAll('.pad button').forEach(b => {
+  const name = b.dataset.act;
+  let timer = null, repeat = null;
+  const stop = () => { clearTimeout(timer); clearInterval(repeat); timer = repeat = null; };
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    doAct(name);
+    if (name === 'left' || name === 'right' || name === 'down'){
+      timer = setTimeout(() => { repeat = setInterval(() => doAct(name), 55); }, 220);
+    }
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev => b.addEventListener(ev, stop));
 });
+
+/* swipe / tap on the board */
+(function(){
+  const stage = document.querySelector('.stage');
+  let sx = 0, sy = 0, st = 0, moved = 0;
+  stage.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; st = Date.now(); moved = 0; });
+  stage.addEventListener('pointermove', e => {
+    if (!st) return;
+    const dx = e.clientX - sx;
+    if (Math.abs(dx) >= CELL){
+      doAct(dx > 0 ? 'right' : 'left');
+      sx = e.clientX; moved = 1;
+    }
+  });
+  stage.addEventListener('pointerup', e => {
+    if (!st) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy, dt = Date.now() - st;
+    st = 0;
+    if (e.target.tagName === 'BUTTON') return;
+    if (!moved && Math.abs(dx) < 12 && Math.abs(dy) < 12 && dt < 300) doAct('rotate');
+    else if (dy > CELL * 2 && Math.abs(dx) < Math.abs(dy)) doAct('drop');
+  });
+})();
 
 document.getElementById('ovBtn').addEventListener('click', () => {
   if (state === 'paused'){ state = 'play'; last = performance.now(); document.getElementById('overlay').hidden = true; }
   else reset();
 });
 
+addEventListener('resize', fit);
+addEventListener('orientationchange', () => setTimeout(fit, 150));
+document.addEventListener('dblclick', e => e.preventDefault());
+
+fit();
 reset();
+fit();
 requestAnimationFrame(loop);
 </script>
+</body>
+</html>
